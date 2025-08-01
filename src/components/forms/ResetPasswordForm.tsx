@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { ResetPassword } from "@/schemas/auth";
 
-const ForgotPasswordForm = () => {
+const ResetPasswordForm = () => {
   const [show, setShow] = useState<boolean>(false);
   const [showNew, setShowNew] = useState<boolean>(false);
 
@@ -111,4 +111,4 @@ const ForgotPasswordForm = () => {
   );
 };
 
-export default ForgotPasswordForm;
+export default ResetPasswordForm;
