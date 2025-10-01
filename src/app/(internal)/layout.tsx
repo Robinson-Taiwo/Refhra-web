@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 
 import type { Metadata } from "next";
@@ -36,8 +36,8 @@ export default async function RootLayout({
       >
         <SidebarProvider defaultOpen={defaultOpen}>
           <AppSidebar />
-          <main className="w-screen"  >
-            <SidebarTrigger />
+          <main className="w-screen relative ">
+            {/* <SidebarTrigger /> */}
             {children}
           </main>
         </SidebarProvider>

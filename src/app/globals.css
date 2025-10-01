@@ -192,5 +192,5 @@ tr {
 }
 
 .fc-timegrid-axis{
-  @apply outline-none border-none flex bg
+  @apply outline-none border-none flex 
 }
