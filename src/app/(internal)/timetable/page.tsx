@@ -1,5 +1,12 @@
-import Timetable from '@/components/Timetable';
+import Timetable from "@/components/Timetable";
+import React from "react";
 
-export default function TimetablePage() {
-  return <Timetable />;
-}
+const Calendar = () => {
+  return (
+    <div className="w-full h-full">
+      <Timetable />
+    </div>
+  );
+};
+
+export default Calendar;

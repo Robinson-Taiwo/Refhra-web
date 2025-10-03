@@ -130,10 +130,33 @@
   }
 }
 
-.fc-button {
-  @apply bg-blue-500 text-white hover:bg-blue-600;
+/* Hide scrollbar but keep scrolling */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
-.fc-event {
-  @apply cursor-move;
+/* Hide scrollbar for Chrome, Safari and Edge */
+.onboarding-card::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.onboarding-card {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+}
+
+/* Chrome, Safari, Edge */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
