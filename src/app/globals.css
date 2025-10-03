@@ -130,67 +130,33 @@
   }
 }
 
-.fc-button {
-  @apply bg-blue-500 text-white hover:bg-blue-600;
+/* Hide scrollbar but keep scrolling */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
-.fc-event {
-  @apply cursor-move;
+/* Hide scrollbar for Chrome, Safari and Edge */
+.onboarding-card::-webkit-scrollbar {
+  display: none;
 }
 
-.fc-theme-standard td {
-  border-left: none !important;
-  border-bottom: none !important;
+/* Hide scrollbar for Firefox */
+.onboarding-card {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
 }
 
-.fc-timegrid-allday {
-  display: none !important;
+/* Chrome, Safari, Edge */
+::-webkit-scrollbar {
+  display: none;
 }
 
-thead {
-  border-top: none !important;
-}
-
-tr {
-  border: none !important;
-}
-
-/* .fc .fc-timegrid-slot, .fc .fc-timegrid-allday{
-  border-bottom: 2px solid transparent  !important;
-} */
-
-/* .fc-timegrid-slot {
-  border-top: none !important;
-  padding-top: 8;
-}
-
-.fc-timegrid-slot-lane .fc-timegrid-slot-major {
-  border-top: 1px solid #d13b3b !important;
-}
-
-.fc-timegrid-slot-lane .fc-timegrid-slot-minor {
-  border-top: 1px solid #d13b3b !important;
-} */
-
-.fc-theme-standard td,
-.fc-theme-standard th {
-  border: none;
-}
-
-.fc .fc-timegrid-axis-frame {
-  border: none !important;
-}
-
-.fc-col-header-cell .fc-day .fc-day-mon .fc-day-today {
-  border: none !important;
-  outline: none !important;
-}
-
-.fc-scrollgrid-sync-inner {
-  border: none !important;
-  @apply flex;
-}
-
-.fc-timegrid-axis{
-  @apply outline-none border-none flex 
+/* Firefox */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
