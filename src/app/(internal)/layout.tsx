@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -27,21 +27,21 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+  // const cookieStore = await cookies();
+  // const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SidebarProvider defaultOpen={defaultOpen}>
+        <SidebarProvider defaultOpen={true}>
           <AppSidebar />
           <main className="w-screen relative ">
             {/* <SidebarTrigger /> */}
             <div className="flex flex-col">
               <Navbar />
-              {children}
+              <div className="px-10">{children}</div>
             </div>
           </main>
         </SidebarProvider>
