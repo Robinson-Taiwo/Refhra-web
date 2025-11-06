@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { BookOpen } from 'lucide-react'
 import { FileSpreadsheet, Heart } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
-  // <BookOpen />
 
 const Dashboard = () => {
 

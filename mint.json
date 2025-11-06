@@ -1,0 +1,38 @@
+{
+  "name": "Your Project Name",
+  "logo": "/logo.svg",
+  "theme": {
+    "color": "#007AFF",
+    "mode": "light"
+  },
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": ["introduction", "installation", "quickstart"]
+    },
+    {
+      "group": "Guides",
+      "pages": ["usage", "configuration", "deployment"]
+    },
+    {
+      "group": "API Reference",
+      "pages": ["api/authentication", "api/endpoints", "api/errors"]
+    },
+    {
+      "group": "Extras",
+      "pages": ["faq", "changelog"]
+    }
+  ],
+  "social": {
+    "github": "https://github.com/your-username/your-repo",
+    "twitter": "https://twitter.com/yourhandle",
+    "linkedin": "https://linkedin.com/in/yourprofile"
+  },
+  "footer": {
+    "message": "Made with ❤️ by Taiwo and Team",
+    "copyright": "© 2025 Your Company or Project Name"
+  },
+  "openapi": {
+    "source": "openapi.yaml"
+  }
+}
