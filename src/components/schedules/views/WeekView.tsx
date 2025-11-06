@@ -109,7 +109,7 @@ export default function WeekView() {
   return (
     <div className="p-6 min-h-screen">
       <h1 className="text-2xl font-semibold mb-6">
-        Week View (Enhanced Layout)
+        Week View 
       </h1>
 
       {/* Week Grid */}
