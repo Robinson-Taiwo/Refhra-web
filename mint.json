@@ -1,9 +1,12 @@
 {
   "name": "Your Project Name",
-  "logo": "/logo.svg",
-  "theme": {
-    "color": "#007AFF",
-    "mode": "light"
+  "logo": "/refhra.svg",
+  "favicon": "/rwfhra.svg",
+  "theme": "venus",
+  "colors": {
+    "primary": "#007AFF",
+    "light": "#F5F9FF",
+    "dark": "#0A0A0A"
   },
   "navigation": [
     {
@@ -28,11 +31,9 @@
     "twitter": "https://twitter.com/yourhandle",
     "linkedin": "https://linkedin.com/in/yourprofile"
   },
+  "openapi": ["openapi.yaml"],
   "footer": {
     "message": "Made with ❤️ by Taiwo and Team",
-    "copyright": "© 2025 Your Company or Project Name"
-  },
-  "openapi": {
-    "source": "openapi.yaml"
+    "copyright": "© 2025 Refhra. All rights reserved."
   }
 }
