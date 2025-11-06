@@ -31,6 +31,7 @@ const Schedule = () => {
               }`}
             >
               {v.name} View
+              
             </Button>
           ))}
         </div>
