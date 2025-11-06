@@ -1,8 +1,8 @@
 "use client";
 
 import DayView from "@/components/scheduler/DayView";
-import MonthView from "@/components/scheduler/MonthView";
-import WeekView from "@/components/scheduler/WeekView";
+// import MonthView from "@/components/scheduler/MonthView";
+// import WeekView from "@/components/scheduler/WeekView";
 
 import React, { useState } from "react";
 
@@ -34,8 +34,8 @@ export default function CalendarView() {
       </div>
 
       {view === "day" && <DayView />}
-      {view === "week" && <WeekView />}
-      {view === "month" && <MonthView />}
+      {/* {view === "week" && <WeekView />}
+      {view === "month" && <MonthView />} */}
     </div>
   );
 }

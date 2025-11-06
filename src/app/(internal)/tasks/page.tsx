@@ -1,11 +1,12 @@
-import React from 'react'
+import OnboardingCard from "@/components/onboarding/OnboardingCard";
+import React from "react";
 
 const Task = () => {
   return (
     <div>
-      this is the Task page
+      <OnboardingCard />
     </div>
-  )
-}
+  );
+};
 
-export default Task
+export default Task;
