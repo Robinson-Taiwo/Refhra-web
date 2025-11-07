@@ -1,6 +1,7 @@
 "use client";
-import TaskCard from "@/components/schedules/TaskCard";
+
 import React, { useState } from "react";
+import TaskCard from "@/components/schedules/TaskCard";
 import TaskOverview from "./TaskOverview";
 
 type Task = {
@@ -11,86 +12,25 @@ type Task = {
   color: string;
 };
 
+type HorizontalDayViewProps = {
+  selectedDate: Date;
+  onSelectDate: (date: Date) => void;
+};
+
 const hours = Array.from({ length: 24 }, (_, i) => i);
 
 const sampleTasks: Task[] = [
-  {
-    id: 1,
-    title: "Team Sync",
-    startTime: "09:15",
-    endTime: "09:45",
-    color: "#60A5FA",
-  },
-  {
-    id: 2,
-    title: "Code Review",
-    startTime: "10:00",
-    endTime: "11:30",
-    color: "#FACC15",
-  },
-  {
-    id: 3,
-    title: "Lunch",
-    startTime: "13:00",
-    endTime: "14:00",
-    color: "#34D399",
-  },
-  {
-    id: 4,
-    title: "UI Design",
-    startTime: "10:15",
-    endTime: "10:30",
-    color: "#F472B6",
-  },
-  {
-    id: 5,
-    title: "Product Check-in",
-    startTime: "10:30",
-    endTime: "10:45",
-    color: "#C084FC",
-  },
-  {
-    id: 6,
-    title: "Research",
-    startTime: "10:45",
-    endTime: "11:00",
-    color: "#A3E635",
-  },
-  {
-    id: 7,
-    title: "Test",
-    startTime: "10:00",
-    endTime: "10:10",
-    color: "#FB923C",
-  },
-  {
-    id: 8,
-    title: "Bug Fix",
-    startTime: "10:10",
-    endTime: "10:20",
-    color: "#F87171",
-  },
-  {
-    id: 9,
-    title: "Docs",
-    startTime: "10:20",
-    endTime: "10:30",
-    color: "#4ADE80",
-  },
-  {
-    id: 10,
-    title: "Call",
-    startTime: "10:30",
-    endTime: "10:40",
-    color: "#38BDF8",
-  },
-  {
-    id: 11,
-    title: "Call Ashia",
-    startTime: "00:30",
-    endTime: "01:40",
-    color: "#38CDF8",
-  },
+  { id: 1, title: "Team Sync", startTime: "09:15", endTime: "09:45", color: "#60A5FA" },
+  { id: 2, title: "Code Review", startTime: "10:00", endTime: "11:30", color: "#FACC15" },
+  { id: 3, title: "Lunch", startTime: "13:00", endTime: "14:00", color: "#34D399" },
+  { id: 4, title: "UI Design", startTime: "10:15", endTime: "10:30", color: "#F472B6" },
+  { id: 5, title: "Product Check-in", startTime: "10:30", endTime: "10:45", color: "#C084FC" },
+  { id: 6, title: "Research", startTime: "10:45", endTime: "11:00", color: "#A3E635" },
+  { id: 7, title: "Test", startTime: "10:00", endTime: "10:10", color: "#FB923C" },
+  { id: 8, title: "Bug Fix", startTime: "10:10", endTime: "10:20", color: "#F87171" },
+  { id: 9, title: "Docs", startTime: "10:20", endTime: "10:30", color: "#4ADE80" },
+  { id: 10, title: "Call", startTime: "10:30", endTime: "10:40", color: "#38BDF8" },
+  { id: 11, title: "Call Ashia", startTime: "00:30", endTime: "01:40", color: "#38CDF8" },
 ];
 
 function timeToMinutes(time: string) {
@@ -109,16 +49,42 @@ function getTasksForHour(hour: number, tasks: Task[]) {
   });
 }
 
-export default function HorizontalDayView() {
+export default function HorizontalDayView({
+  selectedDate,
+  onSelectDate,
+}: HorizontalDayViewProps) {
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+  const formattedDate = selectedDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-semibold mb-6">
-        Day View (Interactive Task Modal)
-      </h1>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">Day View (Interactive Task Modal)</h1>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => onSelectDate(new Date(selectedDate.setDate(selectedDate.getDate() - 1)))}
+            className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300"
+          >
+            Previous
+          </button>
+          <span className="text-gray-700 font-medium">{formattedDate}</span>
+          <button
+            onClick={() => onSelectDate(new Date(selectedDate.setDate(selectedDate.getDate() + 1)))}
+            className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300"
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
+      {/* Hourly grid */}
       <div className="grid grid-cols-6 gap-5">
         {hours.map((hour) => {
           const tasks = getTasksForHour(hour, sampleTasks);
@@ -203,7 +169,7 @@ export default function HorizontalDayView() {
         })}
       </div>
 
-      {/* 🧠 Task Overview Modal */}
+      {/* Task Overview Modal */}
       {selectedTask && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
@@ -214,8 +180,8 @@ export default function HorizontalDayView() {
             startTime={selectedTask.startTime}
             color={selectedTask.color}
             id={selectedTask.id}
-                      title={selectedTask.title}
-                      setSelectedTask={setSelectedTask}
+            title={selectedTask.title}
+            setSelectedTask={setSelectedTask}
           />
         </div>
       )}
