@@ -31,7 +31,7 @@
     "twitter": "https://twitter.com/yourhandle",
     "linkedin": "https://linkedin.com/in/yourprofile"
   },
-  "openapi": ["openapi.yaml"],
+  "openapi": [],
   "footer": {
     "message": "Made with ❤️ by Taiwo and Team",
     "copyright": "© 2025 Refhra. All rights reserved."

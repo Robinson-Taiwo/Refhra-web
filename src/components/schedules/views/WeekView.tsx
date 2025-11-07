@@ -11,7 +11,13 @@ type Task = {
   day: string;
 };
 
-const weekDays = [
+interface WeekViewProps {
+  selectedDate: Date;
+  onSelectDate: (date: Date) => void;
+  tasks?: Task[];
+}
+
+const defaultWeekDays = [
   "Monday",
   "Tuesday",
   "Wednesday",
@@ -21,63 +27,18 @@ const weekDays = [
   "Sunday",
 ];
 
+// Default sample tasks (used when no prop is passed)
 const sampleTasks: Task[] = [
-  {
-    id: 1,
-    title: "Team Sync",
-    startTime: "09:00",
-    endTime: "09:45",
-    color: "#60A5FA",
-    day: "Monday",
-  },
-  {
-    id: 2,
-    title: "Design Review",
-    startTime: "09:15",
-    endTime: "09:50",
-    color: "#34D399",
-    day: "Monday",
-  },
-  {
-    id: 3,
-    title: "Code Review",
-    startTime: "10:00",
-    endTime: "11:30",
-    color: "#FACC15",
-    day: "Tuesday",
-  },
-  {
-    id: 4,
-    title: "Marketing Review",
-    startTime: "11:00",
-    endTime: "12:00",
-    color: "#FB923C",
-    day: "Thursday",
-  },
-  {
-    id: 5,
-    title: "Client Demo",
-    startTime: "09:30",
-    endTime: "10:00",
-    color: "#A78BFA",
-    day: "Friday",
-  },
-  {
-    id: 6,
-    title: "Hackathon Prep",
-    startTime: "14:00",
-    endTime: "15:30",
-    color: "#F472B6",
-    day: "Saturday",
-  },
-  {
-    id: 7,
-    title: "Church Service",
-    startTime: "09:00",
-    endTime: "11:00",
-    color: "#38BDF8",
-    day: "Sunday",
-  },
+  { id: 1, title: "Team Sync", startTime: "09:00", endTime: "09:45", color: "#60A5FA", day: "Monday" },
+  { id: 2, title: "Design Review", startTime: "09:15", endTime: "09:50", color: "#34D399", day: "Monday" },
+  { id: 3, title: "Code Review", startTime: "10:00", endTime: "11:30", color: "#FACC15", day: "Tuesday" },
+  { id: 4, title: "Marketing Review", startTime: "11:00", endTime: "12:00", color: "#FB923C", day: "Thursday" },
+  { id: 5, title: "Client Demo", startTime: "09:30", endTime: "10:00", color: "#A78BFA", day: "Friday" },
+  { id: 6, title: "Hackathon Prep", startTime: "14:00", endTime: "15:30", color: "#F472B6", day: "Saturday" },
+  { id: 7, title: "Church Service", startTime: "09:00", endTime: "11:00", color: "#38BDF8", day: "Sunday" },
+  { id: 8, title: "HolyGhost service", startTime: "09:50", endTime: "10:00", color: "#58BEF8", day: "Monday" },
+  { id: 9, title: "HolyGhost service", startTime: "10:10", endTime: "10:30", color: "#A78BFA", day: "Monday" },
+  { id: 10, title: "Marketing Review", startTime: "10:30", endTime: "10:50", color: "#FB923C", day: "Monday" },
 ];
 
 function timeToMinutes(time: string) {
@@ -103,19 +64,22 @@ function getTasksForDay(day: string, tasks: Task[]) {
     .sort((a, b) => a.start - b.start);
 }
 
-export default function WeekView() {
+export default function WeekView({
+  selectedDate,
+  onSelectDate,
+  tasks = sampleTasks,
+}: WeekViewProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   return (
     <div className="p-6 min-h-screen">
       <h1 className="text-2xl font-semibold mb-6">
-        Week View 
+        Week View ({selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })})
       </h1>
 
-      {/* Week Grid */}
-      <div className="grid grid-cols-7 overflow-x-hidden overflow-hidden gap-4">
-        {weekDays.map((day) => {
-          const tasks = getTasksForDay(day, sampleTasks);
+      <div className="grid grid-cols-7 gap-4 overflow-x-hidden">
+        {defaultWeekDays.map((day) => {
+          const tasksForDay = getTasksForDay(day, tasks);
 
           return (
             <div
@@ -123,12 +87,19 @@ export default function WeekView() {
               className="relative bg-white rounded-2xl shadow-sm border border-gray-200 h-[1200px] overflow-y-auto overflow-x-hidden flex flex-col hover:shadow-md transition-all"
             >
               {/* Day Header */}
-              <div className="text-center font-semibold text-sm py-3 border-b border-gray-100 bg-gray-100 sticky top-0 z-10">
+              <div
+                className={`text-center font-semibold text-sm py-3 border-b border-gray-100 sticky top-0 z-10 ${
+                  day === selectedDate.toLocaleDateString("en-US", { weekday: "long" })
+                    ? "bg-blue-50 text-blue-600"
+                    : "bg-gray-100"
+                }`}
+                onClick={() => onSelectDate(getDateFromWeekday(day, selectedDate))}
+              >
                 {day}
               </div>
 
               {/* Hour Grid Lines */}
-              <div className="absolute inset-0 top-[40px] pointer-events-none">
+              <div className="absolute inset-0 overflow-hidden top-[40px] pointer-events-none">
                 {Array.from({ length: 25 }, (_, i) => (
                   <div
                     key={i}
@@ -142,41 +113,50 @@ export default function WeekView() {
 
               {/* Task Blocks */}
               <div className="relative flex-1 mt-2">
-                {tasks.map((task) => {
-                  // Find overlapping tasks
-                  const overlapping = tasks.filter(
+                {tasksForDay.map((task) => {
+                  const overlapping = tasksForDay.filter(
                     (t) =>
-                      timeToMinutes(t.startTime) <
-                        timeToMinutes(task.endTime) &&
+                      timeToMinutes(t.startTime) < timeToMinutes(task.endTime) &&
                       timeToMinutes(t.endTime) > timeToMinutes(task.startTime)
                   );
 
-                  // Calculate width and offset for overlaps
                   const overlapCount = overlapping.length;
-                  const taskIndex = overlapping.findIndex(
-                    (t) => t.id === task.id
-                  );
-
+                  const taskIndex = overlapping.findIndex((t) => t.id === task.id);
                   const width = 100 / overlapCount;
                   const left = taskIndex * width;
+
+                  const actualHeight = (task.height / 100) * 1200;
+                  const isCompact = actualHeight < 40;
 
                   return (
                     <button
                       key={task.id}
                       onClick={() => setSelectedTask(task)}
-                      className="absolute rounded-md text-xs text-white p-2 font-medium shadow-sm transition-all hover:scale-[1.03]"
+                      className={`absolute rounded-md text-xs text-white p-2 font-medium shadow-sm transition-all hover:scale-[1.03] ${
+                        isCompact ? "flex items-center justify-between space-x-1" : ""
+                      }`}
                       style={{
                         top: `${task.top}%`,
                         height: `${task.height}%`,
                         width: `${width}%`,
                         left: `${left}%`,
                         backgroundColor: task.color,
+                        minHeight: "18px",
                       }}
                     >
-                      <div className="truncate">{task.title}</div>
-                      <div className="text-[10px] opacity-80">
-                        {task.startTime} - {task.endTime}
-                      </div>
+                      {isCompact ? (
+                        <>
+                          <span className="truncate">{task.title}</span>
+                          <span className="text-[10px] opacity-80">{task.startTime}</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="truncate">{task.title}</div>
+                          <div className="text-[10px] opacity-80">
+                            {task.startTime} - {task.endTime}
+                          </div>
+                        </>
+                      )}
                     </button>
                   );
                 })}
@@ -186,7 +166,7 @@ export default function WeekView() {
         })}
       </div>
 
-      {/* Task Overview Modal */}
+      {/* Task Modal */}
       {selectedTask && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-10"
@@ -203,27 +183,15 @@ export default function WeekView() {
 
             <h2 className="text-xl font-semibold mb-1">{selectedTask.title}</h2>
             <p className="text-sm text-gray-500 mb-3">
-              {selectedTask.startTime} - {selectedTask.endTime} |{" "}
-              {selectedTask.day}
+              {selectedTask.startTime} - {selectedTask.endTime} | {selectedTask.day}
             </p>
 
             <div className="mb-4">
-              <h3 className="text-sm font-semibold text-gray-800 mb-1">
-                Description
-              </h3>
+              <h3 className="text-sm font-semibold text-gray-800 mb-1">Description</h3>
               <p className="text-sm text-gray-700 leading-relaxed">
-                This is an overview for <b>{selectedTask.title}</b>. Include
-                detailed notes, meeting links, or sub-tasks here.
+                This is an overview for <b>{selectedTask.title}</b>. Include detailed notes or meeting
+                info here.
               </p>
-            </div>
-
-            <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-800 mb-1">
-                Priority
-              </h3>
-              <span className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                Medium
-              </span>
             </div>
 
             <Button
@@ -237,4 +205,13 @@ export default function WeekView() {
       )}
     </div>
   );
+}
+
+// Helper: get Date for clicked weekday (relative to current week)
+function getDateFromWeekday(weekday: string, currentDate: Date) {
+  const dayIndex = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].indexOf(weekday);
+  const diff = dayIndex - currentDate.getDay();
+  const newDate = new Date(currentDate);
+  newDate.setDate(currentDate.getDate() + diff);
+  return newDate;
 }
