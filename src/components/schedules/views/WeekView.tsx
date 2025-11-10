@@ -73,9 +73,9 @@ export default function WeekView({
 
   return (
     <div className="p-6 min-h-screen">
-      <h1 className="text-2xl font-semibold mb-6">
+      {/* <h1 className="text-2xl font-semibold mb-6">
         Week View ({selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })})
-      </h1>
+      </h1> */}
 
       <div className="grid grid-cols-7 gap-4 overflow-x-hidden">
         {defaultWeekDays.map((day) => {

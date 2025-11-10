@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import TaskCard from "@/components/schedules/TaskCard";
 import TaskOverview from "./TaskOverview";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type Task = {
   id: number;
@@ -15,6 +16,7 @@ type Task = {
 type HorizontalDayViewProps = {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
+  onAddTaskAtTime: (time: string) => void; // 👈 Add this prop
 };
 
 const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -52,34 +54,31 @@ function getTasksForHour(hour: number, tasks: Task[]) {
 export default function HorizontalDayView({
   selectedDate,
   onSelectDate,
+  onAddTaskAtTime, // 👈 used below
 }: HorizontalDayViewProps) {
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  const formattedDate = selectedDate.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-  });
-
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Day View (Interactive Task Modal)</h1>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => onSelectDate(new Date(selectedDate.setDate(selectedDate.getDate() - 1)))}
-            className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300"
+            onClick={() =>
+              onSelectDate(new Date(selectedDate.setDate(selectedDate.getDate() - 1)))
+            }
+            className="text-sm p-3 bg-gray-200 rounded-full hover:bg-gray-300"
           >
-            Previous
+            <ChevronLeft className="w-8 h-8 text-gray-600" />
           </button>
-          <span className="text-gray-700 font-medium">{formattedDate}</span>
           <button
-            onClick={() => onSelectDate(new Date(selectedDate.setDate(selectedDate.getDate() + 1)))}
-            className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300"
+            onClick={() =>
+              onSelectDate(new Date(selectedDate.setDate(selectedDate.getDate() + 1)))
+            }
+            className="text-sm p-3 rounded-full bg-gray-200 hover:bg-gray-300"
           >
-            Next
+            <ChevronRight className="w-8 h-8 text-gray-600" />
           </button>
         </div>
       </div>
@@ -90,15 +89,20 @@ export default function HorizontalDayView({
           const tasks = getTasksForHour(hour, sampleTasks);
           const visibleTasks = tasks.slice(0, 3);
           const hiddenCount = tasks.length - visibleTasks.length;
+          const timeLabel = `${hour.toString().padStart(2, "0")}:00`;
 
           return (
             <div
               key={hour}
-              className="relative w-full h-56 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden hover:shadow-md transition-all"
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest(".task-card")) return;
+                onAddTaskAtTime(timeLabel); // 👈 opens AddTaskModal
+              }}
+              className="relative w-full h-56 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden hover:shadow-md transition-all cursor-pointer"
             >
               {/* Hour Label */}
               <div className="text-center font-semibold text-sm py-2 border-b border-gray-100 bg-white rounded-t-2xl">
-                {hour.toString().padStart(2, "0")}:00
+                {timeLabel}
               </div>
 
               {/* Task container */}
@@ -107,63 +111,29 @@ export default function HorizontalDayView({
                   {visibleTasks.map((task) => (
                     <button
                       key={task.id}
-                      onClick={() => setSelectedTask(task)}
-                      className="bg-transparent hover:bg-transparent cursor-pointer w-full block h-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTask(task);
+                      }}
+                      className="task-card bg-transparent hover:bg-transparent cursor-pointer w-full block h-full"
                     >
-                      <TaskCard
-                        endTime={task.endTime}
-                        startTime={task.startTime}
-                        color={task.color}
-                        id={task.id}
-                        title={task.title}
-                      />
+                      <TaskCard {...task} />
                     </button>
                   ))}
                 </div>
 
                 {hiddenCount > 0 && (
                   <button
-                    onClick={() => setSelectedHour(hour)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedHour(hour);
+                    }}
                     className="text-[11px] text-blue-500 font-medium hover:underline mt-1"
                   >
                     + {hiddenCount} more
                   </button>
                 )}
               </div>
-
-              {/* Overflow tasks modal */}
-              {selectedHour === hour && (
-                <div
-                  className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-10"
-                  onClick={() => setSelectedHour(null)}
-                >
-                  <div
-                    className="bg-white rounded-xl shadow-lg flex flex-col w-80 p-4 max-h-[400px] h-full overflow-auto"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="text-center font-semibold text-sm py-2 border-b border-gray-100 bg-white rounded-t-2xl">
-                      {hour.toString().padStart(2, "0")}:00
-                    </div>
-                    <div className="flex flex-col overflow-auto">
-                      {tasks.map((task) => (
-                        <button
-                          key={task.id}
-                          onClick={() => setSelectedTask(task)}
-                          className="bg-transparent hover:bg-transparent cursor-pointer w-full h-fit"
-                        >
-                          <TaskCard
-                            endTime={task.endTime}
-                            startTime={task.startTime}
-                            color={task.color}
-                            id={task.id}
-                            title={task.title}
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
@@ -175,14 +145,42 @@ export default function HorizontalDayView({
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={() => setSelectedTask(null)}
         >
-          <TaskOverview
-            endTime={selectedTask.endTime}
-            startTime={selectedTask.startTime}
-            color={selectedTask.color}
-            id={selectedTask.id}
-            title={selectedTask.title}
-            setSelectedTask={setSelectedTask}
-          />
+          <TaskOverview {...selectedTask} setSelectedTask={setSelectedTask} />
+        </div>
+      )}
+
+      {/* Hour Overview Modal */}
+      {selectedHour !== null && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+          onClick={() => setSelectedHour(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Tasks for {selectedHour.toString().padStart(2, "0")}:00</h3>
+              <button
+                onClick={() => setSelectedHour(null)}
+                className="text-sm text-gray-500"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-60 overflow-auto">
+              {getTasksForHour(selectedHour, sampleTasks).map((task) => (
+                <div key={task.id} className="p-2 rounded border border-gray-100">
+                  <TaskCard {...task} />
+                </div>
+              ))}
+
+              {getTasksForHour(selectedHour, sampleTasks).length === 0 && (
+                <div className="text-sm text-gray-500">No tasks in this hour</div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
