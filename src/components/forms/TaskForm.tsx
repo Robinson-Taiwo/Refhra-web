@@ -1,10 +1,34 @@
 "use client";
 
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { taskSchema, TaskFormData } from "@/schemas/task";
+import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+/* -----------------------------
+   ZOD SCHEMA & TYPES
+----------------------------- */
+
+export const taskSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  priority: z
+    .enum(["Low", "Medium", "High"])
+    .refine((val) => ["Low", "Medium", "High"].includes(val), {
+      message: "Select a valid priority",
+    }),
+  duration: z
+    .number({ invalid_type_error: "Duration must be a number" })
+    .min(1, "Duration must be greater than 0"),
+  deadline: z.string().optional(),
+});
+
+export type TaskFormData = z.infer<typeof taskSchema>;
+
+/* -----------------------------
+   TASK FORM COMPONENT
+----------------------------- */
 
 export function TaskForm() {
   const {
@@ -13,6 +37,7 @@ export function TaskForm() {
     formState: { errors },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
+    mode: "onSubmit",
   });
 
   const onSubmit = (data: TaskFormData) => {
@@ -20,20 +45,47 @@ export function TaskForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <Input {...register("title" as const)} placeholder="Task Title" />
-      {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md">
+      {/* Title */}
+      <div>
+        <Input {...register("title")} placeholder="Task Title" />
+        {errors.title && (
+          <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+        )}
+      </div>
 
-      <Input {...register("priority" as const)} placeholder="Priority (Low, Medium, High)" />
-      {errors.priority && <p className="text-sm text-red-500">{errors.priority.message}</p>}
+      {/* Priority */}
+      <div>
+        <Input {...register("priority")} placeholder="Priority (Low, Medium, High)" />
+        {errors.priority && (
+          <p className="text-sm text-red-500 mt-1">{errors.priority.message}</p>
+        )}
+      </div>
 
-      <Input type="number" {...register("duration" as const)} placeholder="Duration (mins)" />
-      {errors.duration && <p className="text-sm text-red-500">{errors.duration.message}</p>}
+      {/* Duration */}
+      <div>
+        <Input
+          type="number"
+          {...register("duration", { valueAsNumber: true })}
+          placeholder="Duration (mins)"
+        />
+        {errors.duration && (
+          <p className="text-sm text-red-500 mt-1">{errors.duration.message}</p>
+        )}
+      </div>
 
-      <Input {...register("deadline" as const)} placeholder="Deadline" />
-      {errors.deadline && <p className="text-sm text-red-500">{errors.deadline.message}</p>}
+      {/* Deadline */}
+      <div>
+        <Input {...register("deadline")} placeholder="Deadline (optional)" />
+        {errors.deadline && (
+          <p className="text-sm text-red-500 mt-1">{errors.deadline.message}</p>
+        )}
+      </div>
 
-      <Button type="submit">Submit Task</Button>
+      {/* Submit */}
+      <Button type="submit" className="mt-2 w-full">
+        Submit Task
+      </Button>
     </form>
   );
 }
