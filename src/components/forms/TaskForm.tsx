@@ -7,9 +7,7 @@ import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-/* -----------------------------
-   ZOD SCHEMA & TYPES
------------------------------ */
+
 
 export const taskSchema = z.object({
   title: z.string().min(1, "Title is required"),
