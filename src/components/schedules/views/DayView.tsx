@@ -1,190 +1,217 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import TaskCard from "@/components/schedules/TaskCard";
-import TaskOverview from "./TaskOverview";
-
-type Task = {
-  id: number;
-  title: string;
-  startTime: string;
-  endTime: string;
-  color: string;
-};
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ScheduleTask } from "@/components/types/Schedule";
+import { toast } from "sonner";
 
 type HorizontalDayViewProps = {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
+  onAddTaskAtTime: (time: string) => void;
+  tasks?: ScheduleTask[];
+  onEdit?: (task: ScheduleTask) => void;
+};
+
+type TaskSegment = ScheduleTask & {
+  segmentStart: number;
+  segmentDuration: number;
+  parentTaskId: string;
+  isContinuation: boolean;
 };
 
 const hours = Array.from({ length: 24 }, (_, i) => i);
-
-const sampleTasks: Task[] = [
-  { id: 1, title: "Team Sync", startTime: "09:15", endTime: "09:45", color: "#60A5FA" },
-  { id: 2, title: "Code Review", startTime: "10:00", endTime: "11:30", color: "#FACC15" },
-  { id: 3, title: "Lunch", startTime: "13:00", endTime: "14:00", color: "#34D399" },
-  { id: 4, title: "UI Design", startTime: "10:15", endTime: "10:30", color: "#F472B6" },
-  { id: 5, title: "Product Check-in", startTime: "10:30", endTime: "10:45", color: "#C084FC" },
-  { id: 6, title: "Research", startTime: "10:45", endTime: "11:00", color: "#A3E635" },
-  { id: 7, title: "Test", startTime: "10:00", endTime: "10:10", color: "#FB923C" },
-  { id: 8, title: "Bug Fix", startTime: "10:10", endTime: "10:20", color: "#F87171" },
-  { id: 9, title: "Docs", startTime: "10:20", endTime: "10:30", color: "#4ADE80" },
-  { id: 10, title: "Call", startTime: "10:30", endTime: "10:40", color: "#38BDF8" },
-  { id: 11, title: "Call Ashia", startTime: "00:30", endTime: "01:40", color: "#38CDF8" },
-];
 
 function timeToMinutes(time: string) {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
 }
 
-function getTasksForHour(hour: number, tasks: Task[]) {
+function isSameDay(dateStr: string, date: Date) {
+  const d = new Date(dateStr);
+  return (
+    d.getFullYear() === date.getFullYear() &&
+    d.getMonth() === date.getMonth() &&
+    d.getDate() === date.getDate()
+  );
+}
+
+const buildTaskSegments = (tasks: ScheduleTask[]) => {
+  const segments: TaskSegment[] = [];
+  const occupied = new Map<number, number>();
+
+  for (const task of tasks) {
+    const start = timeToMinutes(task.startTime);
+    const end = timeToMinutes(task.endTime);
+
+    let remaining = end - start;
+    let cursor = start;
+    let segmentIndex = 0;
+
+    while (remaining > 0) {
+      const hour = Math.floor(cursor / 60);
+      const used = occupied.get(hour) ?? 0;
+      const available = 60 - used;
+
+      if (available <= 0) {
+        throw new Error(
+          `${hour.toString().padStart(2, "0")}:00 is fully booked.`
+        );
+      }
+
+      const segmentDuration = Math.min(available, remaining);
+
+      segments.push({
+        ...task,
+        segmentStart: cursor,
+        segmentDuration,
+        parentTaskId: String(task.id),
+        isContinuation: segmentIndex > 0,
+      });
+
+      occupied.set(hour, used + segmentDuration);
+
+      cursor += segmentDuration;
+      remaining -= segmentDuration;
+      segmentIndex++;
+    }
+  }
+
+  return segments;
+};
+
+const getSegmentsForHour = (hour: number, segments: TaskSegment[]) => {
   const startOfHour = hour * 60;
   const endOfHour = startOfHour + 60;
 
-  return tasks.filter((task) => {
-    const start = timeToMinutes(task.startTime);
-    const end = timeToMinutes(task.endTime);
-    return end > startOfHour && start < endOfHour;
-  });
-}
+  return segments
+    .filter((s) => s.segmentStart >= startOfHour && s.segmentStart < endOfHour)
+    .sort((a, b) => a.segmentStart - b.segmentStart);
+};
 
 export default function HorizontalDayView({
   selectedDate,
   onSelectDate,
+  onAddTaskAtTime,
+  tasks = [],
+  onEdit,
 }: HorizontalDayViewProps) {
-  const [selectedHour, setSelectedHour] = useState<number | null>(null);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const dayTasks = tasks.filter((task) =>
+    isSameDay(task.date, selectedDate)
+  );
 
-  const formattedDate = selectedDate.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-  });
+  let taskSegments: TaskSegment[] = [];
+
+  try {
+    taskSegments = buildTaskSegments(dayTasks);
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Something went wrong";
+    toast.error(message);
+  }
+
+  const goToPrevDay = () => {
+    const prev = new Date(selectedDate);
+    prev.setDate(prev.getDate() - 1);
+    onSelectDate(prev);
+  };
+
+  const goToNextDay = () => {
+    const next = new Date(selectedDate);
+    next.setDate(next.getDate() + 1);
+    onSelectDate(next);
+  };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      {/* Header */}
+    <div className="p-6 min-h-screen">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Day View (Interactive Task Modal)</h1>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => onSelectDate(new Date(selectedDate.setDate(selectedDate.getDate() - 1)))}
-            className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300"
+            onClick={goToPrevDay}
+            className="p-3 bg-gray-200 rounded-full hover:bg-gray-300"
           >
-            Previous
+            <ChevronLeft className="w-4 lg:w-8 h-4 text-gray-600" />
           </button>
-          <span className="text-gray-700 font-medium">{formattedDate}</span>
+
           <button
-            onClick={() => onSelectDate(new Date(selectedDate.setDate(selectedDate.getDate() + 1)))}
-            className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300"
+            onClick={goToNextDay}
+            className="p-3 bg-gray-200 rounded-full hover:bg-gray-300"
           >
-            Next
+            <ChevronRight className="w-4 lg:w-8 h-4 text-gray-600" />
           </button>
         </div>
       </div>
 
-      {/* Hourly grid */}
-      <div className="grid grid-cols-6 gap-5">
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-5">
         {hours.map((hour) => {
-          const tasks = getTasksForHour(hour, sampleTasks);
-          const visibleTasks = tasks.slice(0, 3);
-          const hiddenCount = tasks.length - visibleTasks.length;
+          const hourSegments = getSegmentsForHour(hour, taskSegments);
+          const timeLabel = `${hour.toString().padStart(2, "0")}:00`;
+
+          const totalUsedMinutes = hourSegments.reduce(
+            (sum, seg) => sum + seg.segmentDuration,
+            0
+          );
 
           return (
             <div
               key={hour}
-              className="relative w-full h-56 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden hover:shadow-md transition-all"
+              onClick={() => {
+                if (totalUsedMinutes >= 60) {
+                  toast.error(`${timeLabel} is fully booked.`);
+                  return;
+                }
+
+                onAddTaskAtTime(timeLabel);
+              }}
+              className="relative w-full h-56 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden hover:shadow-md transition-all cursor-pointer"
             >
-              {/* Hour Label */}
-              <div className="text-center font-semibold text-sm py-2 border-b border-gray-100 bg-white rounded-t-2xl">
-                {hour.toString().padStart(2, "0")}:00
+              <div className="text-center font-semibold text-sm py-2 border-b border-gray-100">
+                {timeLabel}
               </div>
 
-              {/* Task container */}
-              <div className="flex-1 flex flex-col gap-1 p-2 overflow-hidden">
-                <div className="flex flex-col overflow-auto">
-                  {visibleTasks.map((task) => (
+              <div className="flex-1 relative overflow-hidden">
+                {hourSegments.map((segment) => {
+                  const isFull =
+                    segment.segmentDuration >= 59;
+
+                  const heightPercent = isFull
+                    ? 100
+                    : (segment.segmentDuration / 60) * 100;
+
+                  const topPercent = isFull
+                    ? 0
+                    : ((segment.segmentStart % 60) / 60) * 100;
+
+                  return (
                     <button
-                      key={task.id}
-                      onClick={() => setSelectedTask(task)}
-                      className="bg-transparent hover:bg-transparent cursor-pointer w-full block h-full"
+                      key={`${segment.id}-${segment.segmentStart}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit?.(segment);
+                      }}
+                      className="task-card absolute left-0 w-full"
+                      style={{
+                        height: `${heightPercent}%`,
+                        top: `${topPercent}%`,
+                      }}
                     >
                       <TaskCard
-                        endTime={task.endTime}
-                        startTime={task.startTime}
-                        color={task.color}
-                        id={task.id}
-                        title={task.title}
+                        {...segment}
+                        title={
+                          segment.isContinuation
+                            ? `↳ ${segment.title}`
+                            : segment.title
+                        }
                       />
                     </button>
-                  ))}
-                </div>
-
-                {hiddenCount > 0 && (
-                  <button
-                    onClick={() => setSelectedHour(hour)}
-                    className="text-[11px] text-blue-500 font-medium hover:underline mt-1"
-                  >
-                    + {hiddenCount} more
-                  </button>
-                )}
+                  );
+                })}
               </div>
-
-              {/* Overflow tasks modal */}
-              {selectedHour === hour && (
-                <div
-                  className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-10"
-                  onClick={() => setSelectedHour(null)}
-                >
-                  <div
-                    className="bg-white rounded-xl shadow-lg flex flex-col w-80 p-4 max-h-[400px] h-full overflow-auto"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="text-center font-semibold text-sm py-2 border-b border-gray-100 bg-white rounded-t-2xl">
-                      {hour.toString().padStart(2, "0")}:00
-                    </div>
-                    <div className="flex flex-col overflow-auto">
-                      {tasks.map((task) => (
-                        <button
-                          key={task.id}
-                          onClick={() => setSelectedTask(task)}
-                          className="bg-transparent hover:bg-transparent cursor-pointer w-full h-fit"
-                        >
-                          <TaskCard
-                            endTime={task.endTime}
-                            startTime={task.startTime}
-                            color={task.color}
-                            id={task.id}
-                            title={task.title}
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
       </div>
-
-      {/* Task Overview Modal */}
-      {selectedTask && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-          onClick={() => setSelectedTask(null)}
-        >
-          <TaskOverview
-            endTime={selectedTask.endTime}
-            startTime={selectedTask.startTime}
-            color={selectedTask.color}
-            id={selectedTask.id}
-            title={selectedTask.title}
-            setSelectedTask={setSelectedTask}
-          />
-        </div>
-      )}
     </div>
   );
 }

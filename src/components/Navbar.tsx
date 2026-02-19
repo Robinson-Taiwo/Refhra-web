@@ -14,8 +14,8 @@ export default function Navbar() {
 
   return (
     <>
-      <div className=" text-white p-2 w-screen mt-6 flex gap-4 justify-center">
-        <div className="flex bg-black space-x-12 p-4 px-8 rounded-3xl flex-row">
+      <div className=" text-black w-screen flex gap-4 justify-center">
+        <div className="flex bg-white space-x-12 p-4 px-8 rounded-3xl absolute top-6 flex-row">
           <div className="flex flex-col">
             <p onClick={() => setActiveNav("Home")}>
               <Link className="  p-2" href="/">

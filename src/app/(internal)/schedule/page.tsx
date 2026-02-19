@@ -1,33 +1,84 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import HorizontalDayView from "@/components/schedules/views/DayView";
 import WeekView from "@/components/schedules/views/WeekView";
 import MonthView from "@/components/schedules/views/MonthView";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AddTaskModal from "@/components/schedules/AddTaskModal";
+import { ScheduleProvider, useSchedule } from "@/components/context/ScheduleContext";
+import { EditableTask, ScheduleTask } from "@/components/types/Schedule";
 
-const Schedule = () => {
+const emptyTask = (date: string): EditableTask => ({
+  date,
+  title: "",
+  description: "",
+  priority: "Medium",
+  startTime: "",
+  endTime: "",
+  color: "#60A5FA",
+});
+
+const ScheduleInner = () => {
   const [view, setView] = useState<"day" | "week" | "month">("day");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    priority: "medium",
-    timeline: "",
-    color: "#60A5FA",
-  });
+  const [editingTask, setEditingTask] = useState<ScheduleTask | null>(null);
+  const [newTask, setNewTask] = useState(
+    emptyTask(selectedDate.toISOString().slice(0, 10))
+  );
+
+  const { tasks: rawTasks } = useSchedule();
+
+  const tasksWithDay = rawTasks.map(task => ({
+    ...task,
+    day: new Date(task.date).toLocaleDateString("en-US", { weekday: "long" })
+  }));
+
+  const { tasks, addTask, updateTask } = useSchedule();
+
+  /* =========================
+     ADD FROM PLUS BUTTON
+  ========================== */
+
+  const handleAddTask = () => {
+    setEditingTask(null); // 🔥 CLEAR edit mode
+    setNewTask(emptyTask(selectedDate.toISOString().slice(0, 10)));
+    setShowModal(true);
+  };
+
+  /* =========================
+     EDIT TASK (ONLY FROM TASK CLICK)
+  ========================== */
+
+  const handleEditTask = (task: ScheduleTask) => {
+    setEditingTask(task);
+    setNewTask({
+      date: task.date,
+      title: task.title,
+      description: task.description || "",
+      priority: task.priority,
+      startTime: task.startTime,
+      endTime: task.endTime,
+      color: task.color,
+    });
+    setShowModal(true);
+  };
+
+  /* =========================
+     SAVE TASK
+  ========================== */
+
+  const handleSaveTask = () => {
+    if (editingTask) {
+      updateTask({ id: editingTask.id, ...newTask });
+    } else {
+      addTask({ id: Math.floor(Math.random() * 1_000_000), ...newTask });
+    }
+
+    setShowModal(false);
+    setEditingTask(null); // 🔥 RESET AFTER SAVE
+  };
 
   const formattedDate = selectedDate.toLocaleDateString("en-US", {
     weekday: "long",
@@ -42,29 +93,14 @@ const Schedule = () => {
     { name: "Month", value: "month" },
   ];
 
-  const handleAddTask = () => {
-    setShowModal(true);
-  };
-
-  const handleSaveTask = () => {
-    console.log("Saving new task:", newTask);
-    setShowModal(false);
-    // Here, you can trigger Firestore/Supabase task creation or update UI
-  };
-
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen xl:p-6">
       {/* Top Control Bar */}
-      <div className="flex items-center justify-between mb-6">
-        {/* Left: Title + Date */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-800">
-            Your Schedule
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">{formattedDate}</p>
-        </div>
+      <div className="flex flex-col p-4 lg:flex-row lg:justify-between items-left space-x-2 justify-center mb-6">
+        <p className="lg:text-2xl text-base font-bold tracking-tight text-gray-800 mb-4 lg:mb-4">
+          {formattedDate}
+        </p>
 
-        {/* Right: Controls */}
         <div className="flex items-center gap-3">
           {views.map((v) => (
             <Button
@@ -89,129 +125,58 @@ const Schedule = () => {
         </div>
       </div>
 
-      {/* View Renderer */}
+      {/* Calendar View */}
       <div className="transition-all duration-300">
         {view === "day" && (
           <HorizontalDayView
             selectedDate={selectedDate}
             onSelectDate={setSelectedDate}
+            onAddTaskAtTime={(time) => {
+              setEditingTask(null); // 🔥 CRITICAL FIX
+              setNewTask({
+                ...emptyTask(selectedDate.toISOString().slice(0, 10)),
+                startTime: time,
+              });
+              setShowModal(true);
+            }}
+            tasks={tasks}
+            onEdit={handleEditTask}
           />
         )}
+
         {view === "week" && (
-          <WeekView selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+          <WeekView
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            tasks={tasksWithDay}
+          />
         )}
+
         {view === "month" && (
-          <MonthView selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+          <MonthView
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            tasks={tasks}
+          />
         )}
       </div>
 
       {/* Add Task Modal */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="sm:max-w-md rounded-2xl border border-gray-200 shadow-lg">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-gray-800">
-              Add New Task / Event
-            </DialogTitle>
-            <DialogDescription className="text-sm text-gray-500">
-              Fill in the details below to add it to your schedule.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex flex-col gap-4 mt-3">
-            {/* Title */}
-            <div className="space-y-1">
-              <Label>Title</Label>
-              <Input
-                placeholder="e.g. Design meeting"
-                value={newTask.title}
-                onChange={(e) =>
-                  setNewTask((prev) => ({ ...prev, title: e.target.value }))
-                }
-              />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-1">
-              <Label>Description</Label>
-              <Textarea
-                placeholder="Brief summary or notes..."
-                value={newTask.description}
-                onChange={(e) =>
-                  setNewTask((prev) => ({ ...prev, description: e.target.value }))
-                }
-              />
-            </div>
-
-            {/* Priority */}
-            <div className="space-y-1">
-              <Label>Priority</Label>
-              <Select
-                value={newTask.priority}
-                onValueChange={(value) =>
-                  setNewTask((prev) => ({ ...prev, priority: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Timeline */}
-            <div className="space-y-1">
-              <Label>Timeline</Label>
-              <Input
-                type="datetime-local"
-                value={newTask.timeline}
-                onChange={(e) =>
-                  setNewTask((prev) => ({ ...prev, timeline: e.target.value }))
-                }
-              />
-            </div>
-
-            {/* Tag Color */}
-            <div className="space-y-1">
-              <Label>Tag Color</Label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={newTask.color}
-                  onChange={(e) =>
-                    setNewTask((prev) => ({ ...prev, color: e.target.value }))
-                  }
-                  className="w-10 h-10 rounded-md cursor-pointer border border-gray-300"
-                />
-                <span className="text-sm text-gray-500">
-                  Pick a color to tag this event
-                </span>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowModal(false)}
-                className="rounded-xl"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveTask}
-                className="bg-blue-600 text-white rounded-xl hover:bg-blue-700"
-              >
-                Save Task
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AddTaskModal
+        showModal={showModal}
+        setShowModal={setShowModal}
+        newTask={newTask}
+        setNewTask={setNewTask}
+        handleSaveTask={handleSaveTask}
+      />
     </div>
   );
 };
 
-export default Schedule;
+export default function Schedule() {
+  return (
+    <ScheduleProvider>
+      <ScheduleInner />
+    </ScheduleProvider>
+  );
+}

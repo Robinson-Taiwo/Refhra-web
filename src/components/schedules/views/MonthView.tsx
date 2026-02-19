@@ -1,28 +1,18 @@
 "use client";
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-interface Task {
-  date: string; // e.g. "2025-11-05"
-  title: string;
-  color: string;
-}
-
 interface MonthViewProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
+  tasks: ScheduleTask[]; // <-- add this
 }
 
-const sampleTasks: Task[] = [
-  { date: "2025-11-05", title: "Team Sync", color: "#60A5FA" },
-  { date: "2025-11-05", title: "Design Review", color: "#FACC15" },
-  { date: "2025-11-07", title: "Call Client", color: "#34D399" },
-  { date: "2025-11-11", title: "Project Demo", color: "#F472B6" },
-  { date: "2025-11-15", title: "Hackathon", color: "#C084FC" },
-  { date: "2025-11-21", title: "Research", color: "#F87171" },
-];
-
-const MonthView: React.FC<MonthViewProps> = ({ selectedDate, onSelectDate }) => {
+import { useSchedule } from "@/components/context/ScheduleContext"
+import { ScheduleTask } from "@/components/types/Schedule";
+const MonthView: React.FC<MonthViewProps> = ({
+  selectedDate,
+  onSelectDate,
+}) => {
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth();
 
@@ -39,6 +29,7 @@ const MonthView: React.FC<MonthViewProps> = ({ selectedDate, onSelectDate }) => 
   const getDaysArray = () => {
     const days = [];
     const totalCells = Math.ceil((startDay + daysInMonth) / 7) * 7;
+
     for (let i = 0; i < totalCells; i++) {
       const dayNum = i - startDay + 1;
       const isCurrentMonth = dayNum > 0 && dayNum <= daysInMonth;
@@ -47,27 +38,37 @@ const MonthView: React.FC<MonthViewProps> = ({ selectedDate, onSelectDate }) => 
     }
     return days;
   };
+  const { tasks } = useSchedule();
 
   const days = getDaysArray();
 
   const getTasksForDay = (date: Date) => {
-    const dateKey = date.toISOString().split("T")[0];
-    return sampleTasks.filter((t) => t.date === dateKey);
+    const key = date.toISOString().split("T")[0];
+    return tasks.filter((t) => t.date === key);
   };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-3 mx-auto max-h-[100vh] overflow-hidden flex flex-col">
       {/* Month Header */}
       <div className="flex justify-between items-center mb-10">
-        <button onClick={prevMonth} className="p-1.5 hover:bg-gray-100 rounded-full">
+        <button
+          onClick={prevMonth}
+          className="p-1.5 hover:bg-gray-100 rounded-full"
+        >
           <ChevronLeft className="w-8 h-8 text-gray-600" />
         </button>
 
         <h2 className="text-base font-semibold text-gray-800">
-          {selectedDate.toLocaleString("default", { month: "long", year: "numeric" })}
+          {selectedDate.toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          })}
         </h2>
 
-        <button onClick={nextMonth} className="p-1.5 hover:bg-gray-100 rounded-full">
+        <button
+          onClick={nextMonth}
+          className="p-1.5 hover:bg-gray-100 rounded-full"
+        >
           <ChevronRight className="w-8 h-8 text-gray-600" />
         </button>
       </div>
@@ -80,53 +81,85 @@ const MonthView: React.FC<MonthViewProps> = ({ selectedDate, onSelectDate }) => 
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 gap-1 text-[11px] mt-10 flex-grow overflow-y-auto">
+      <div className="grid grid-cols-7 gap-1 text-[11px]  mt-10 flex-grow overflow-y-auto">
         {days.map(({ dayNum, isCurrentMonth, date }, idx) => {
           const isToday =
             date.toDateString() === today.toDateString() && isCurrentMonth;
-          const isSelected = date.toDateString() === selectedDate.toDateString();
+          const isSelected =
+            date.toDateString() === selectedDate.toDateString();
           const dayTasks = getTasksForDay(date);
 
           return (
             <div
               key={idx}
               onClick={() => isCurrentMonth && onSelectDate(date)}
-              className={`min-h-[11.5vh] flex flex-col p-1 rounded-md cursor-pointer transition-all border text-left
+              className={`group relative min-h-[8.5vh] lg:h-48 flex flex-col p-1 rounded-md cursor-pointer transition-all  border text-left
                 ${
                   !isCurrentMonth
                     ? "text-gray-300 border-transparent"
                     : isSelected
-                    ? "bg-blue-600 text-white font-semibold border-blue-600"
-                    : isToday
-                    ? "border border-blue-400 text-blue-600 font-medium"
-                    : "hover:bg-blue-50 text-gray-700 border-transparent"
+                      ? "bg-blue-600 text-white font-semibold border-blue-600"
+                      : isToday
+                        ? "border border-blue-400 text-blue-600 font-medium"
+                        : "hover:bg-blue-50 text-gray-700   border-transparent"
                 }`}
             >
+              {/* Day number */}
               <div className="flex justify-between items-start mb-1">
-                <span className="text-[10px] font-medium">
+                <span className="lg:text-xl lg:font-bold text-base ">
                   {isCurrentMonth ? dayNum : ""}
                 </span>
               </div>
 
-              {/* Task titles */}
+              {/* Task color dots */}
+              <div className="flex flex-wrap gap-[2px] mb-1">
+                {dayTasks.slice(0, 3).map((task, i) => (
+                  <span
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: task.color }}
+                  />
+                ))}
+              </div>
+
+              {/* Task titles (existing behaviour preserved) */}
               <div className="flex flex-col gap-[2px] overflow-hidden">
                 {dayTasks.slice(0, 2).map((task, i) => (
-                  <div key={i} className="flex items-center gap-1 truncate">
+                  <div key={i} className="flex items-center gap-2 truncate">
                     <div
-                      className="w-2 h-2 rounded-full shrink-0"
+                      className="w-2 h-2 rounded-full hidden lg:flex shrink-0"
                       style={{ backgroundColor: task.color }}
-                    ></div>
-                    <span className="truncate text-[10px] leading-tight">
+                    />
+                    <span className="truncate lg:text-base hidden lg:flex mt-2 leading-tight">
                       {task.title}
                     </span>
                   </div>
                 ))}
                 {dayTasks.length > 2 && (
-                  <span className="text-[9px] text-gray-400 font-medium">
+                  <span className="text-[9px] hidden lg:flex text-gray-400 font-medium">
                     +{dayTasks.length - 2} more
                   </span>
                 )}
               </div>
+
+              {/* Hover tooltip */}
+              {dayTasks.length > 0 && isCurrentMonth && (
+                <div className="absolute z-20 hidden group-hover:block bg-white border border-gray-200 shadow-lg rounded-md p-2 text-[10px] w-40 top-8 left-1/2 -translate-x-1/2">
+                  <div className="flex flex-col gap-1">
+                    {dayTasks.map((task, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: task.color }}
+                        />
+                        <span className="truncate text-base text-gray-700">
+                          {task.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
