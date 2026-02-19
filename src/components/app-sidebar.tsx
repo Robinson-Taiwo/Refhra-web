@@ -105,7 +105,7 @@ export function AppSidebar() {
         {/* Main Nav */}
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-6">
+            <SidebarMenu className=" lg:space-y-2 2xl:space-y-4  ">
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -120,7 +120,7 @@ export function AppSidebar() {
                                     text-gray-700 group-hover:text-black
                                     transition-colors duration-200"
                       />
-                      <span className="lg:text-base font-medium">
+                      <span className="lg:text-sm sm:text-base font-medium">
                         {item.title}
                       </span>
                     </Link>
@@ -135,11 +135,11 @@ export function AppSidebar() {
       {/* Footer / Profile */}
       <SidebarFooter>
         {/* Upgrade Prompt */}
-        <div className="bg-blue-50 text-blue-900 h-64 p-3 text-center items-center flex-col flex rounded-lg text-sm font-medium shadow-sm hover:bg-blue-100 transition-colors duration-200">
+        <div className="bg-blue-50 xl:hidden 2xl:flex  border text-blue-900 md:h-10 lg:h-32 2xl:h-64  p-3 text-center items-center flex-col flex rounded-lg text-sm font-medium shadow-sm hover:bg-blue-100 transition-colors duration-200">
           <Image
             src={rocket}
             alt="logo"
-            className="rounded-full h-30 w-30 "
+            className="rounded-full lg:hidden 2xl:flex lg:h-30 lg:w-30 md:h-30 md:w-30  h-20 w-20 "
             width={40} // desired width in pixels
             height={40} // desired height in pixels
           />{" "}
@@ -156,7 +156,6 @@ export function AppSidebar() {
             Upgrade Now
           </Link>
         </div>
-
         <SidebarMenu className="mt-10">
           <SidebarMenuItem>
             <DropdownMenu>

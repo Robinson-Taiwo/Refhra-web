@@ -1,10 +1,18 @@
+"use client"
 import OnboardingCard from "@/components/onboarding/OnboardingCard";
-import React from "react";
+import React, { useState } from "react";
 
 const Task = () => {
+
+  const [close, setClose]= useState(false)
+
+    const closeOnboarding = () => {
+      console.log("🎯 Finished onboarding flow");
+      setClose(true)
+  };
   return (
     <div>
-      <OnboardingCard />
+    {close ? "this is the tasks page": (  <OnboardingCard closeModal={close} setCloseModal={closeOnboarding} />)}
     </div>
   );
 };

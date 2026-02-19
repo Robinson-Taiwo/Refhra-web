@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Button } from "../ui/button";
 import {
@@ -17,45 +18,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { EditableTask } from "@/components/types/Schedule";
 
-interface Task {
+interface AddTaskModalProps {
   showModal: boolean;
   setShowModal: (open: boolean) => void;
-  color: string;
-  timeline: string;
-  description: string;
-  title: string;
-  priority: string;
+  newTask: EditableTask;
+  setNewTask: React.Dispatch<React.SetStateAction<EditableTask>>;
   handleSaveTask: () => void;
-  setNewTask: React.Dispatch<
-    React.SetStateAction<{
-      title: string;
-      description: string;
-      priority: string;
-      timeline: string;
-      color: string;
-    }>
-  >;
-  setSelectedTask: (arg: Task | null) => void;
 }
 
 const AddTaskModal = ({
   showModal,
   setShowModal,
-  title,
+  newTask,
   setNewTask,
   handleSaveTask,
-  timeline,
-  color,
-  description,
-  priority,
-}: Task) => {
+}: AddTaskModalProps) => {
   return (
     <Dialog open={showModal} onOpenChange={setShowModal}>
       <DialogContent className="sm:max-w-md rounded-2xl border border-gray-200 shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-gray-800">
-            Add New Task / Event
+            Add / Edit Task
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-500">
             Fill in the details below to add it to your schedule.
@@ -63,95 +48,90 @@ const AddTaskModal = ({
         </DialogHeader>
 
         <div className="flex flex-col gap-4 mt-3">
-          {/* Title */}
           <div className="space-y-1">
             <Label>Title</Label>
             <Input
-              placeholder="e.g. Design meeting"
-              value={title}
+              value={newTask.title}
               onChange={(e) =>
-                setNewTask((prev) => ({ ...prev, title: e.target.value }))
+                setNewTask((p) => ({ ...p, title: e.target.value }))
               }
             />
           </div>
 
-          {/* Description */}
           <div className="space-y-1">
             <Label>Description</Label>
             <Textarea
-              placeholder="Brief summary or notes..."
-              value={description}
+              value={newTask.description}
               onChange={(e) =>
-                setNewTask((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
+                setNewTask((p) => ({ ...p, description: e.target.value }))
               }
             />
           </div>
 
-          {/* Priority */}
           <div className="space-y-1">
             <Label>Priority</Label>
             <Select
-              value={priority}
+              value={newTask.priority}
               onValueChange={(value) =>
-                setNewTask((prev) => ({ ...prev, priority: value }))
+                setNewTask((p) => ({
+                  ...p,
+                  priority: value as EditableTask["priority"],
+                }))
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select priority" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="Low">Low</SelectItem>
+                <SelectItem value="Medium">Medium</SelectItem>
+                <SelectItem value="High">High</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Timeline */}
-          <div className="space-y-1">
-            <Label>Timeline</Label>
-            <Input
-              type="datetime-local"
-              value={timeline}
-              onChange={(e) =>
-                setNewTask((prev) => ({ ...prev, timeline: e.target.value }))
-              }
-            />
-          </div>
-
-          {/* Tag Color */}
-          <div className="space-y-1">
-            <Label>Tag Color</Label>
-            <div className="flex rounded-full items-center gap-2">
-              <input
-                type="color"
-                value={color}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Start Time</Label>
+              <Input
+                type="time"
+                value={newTask.startTime}
                 onChange={(e) =>
-                  setNewTask((prev) => ({ ...prev, color: e.target.value }))
+                  setNewTask((p) => ({ ...p, startTime: e.target.value }))
                 }
-                className="w-10 h-10 rounded-full cursor-pointer border border-gray-300"
               />
-              <span className="text-sm text-gray-500">
-                Pick a color to tag this event
-              </span>
+            </div>
+            <div className="space-y-1">
+              <Label>End Time</Label>
+              <Input
+                type="time"
+                value={newTask.endTime}
+                onChange={(e) =>
+                  setNewTask((p) => ({ ...p, endTime: e.target.value }))
+                }
+              />
             </div>
           </div>
 
-          {/* Actions */}
+          <div className="space-y-1">
+            <Label>Tag Color</Label>
+            <input
+              type="color"
+              value={newTask.color}
+              onChange={(e) =>
+                setNewTask((p) => ({ ...p, color: e.target.value }))
+              }
+              className="w-10 h-10 rounded-full cursor-pointer border border-gray-300"
+            />
+          </div>
+
           <div className="flex justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowModal(false)}
-              className="rounded-xl"
-            >
+            <Button variant="outline" onClick={() => setShowModal(false)}>
               Cancel
             </Button>
             <Button
               onClick={handleSaveTask}
-              className="bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+              className="bg-blue-600 text-white hover:bg-blue-700"
             >
               Save Task
             </Button>

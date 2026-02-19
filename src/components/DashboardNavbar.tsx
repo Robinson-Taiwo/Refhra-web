@@ -7,9 +7,10 @@ export default function Navbar() {
 
   return (
     <div className="flex  flex-col items-center w-full">
-      <nav className="bg-white flex justify-end  w-full z-50">
-        <div className="max-w-7xl  px-4 sm:px-6 lg:px-20">
-          <div className="flex justify-end h-16 items-center gap-4">
+      <nav className="bg-white pl-10 xl:pl-24 font-bold text-2xl flex justify-between items-center w-full z-50">
+        <div className="flex ">Welcome Taiwo</div>
+        <div className="max-w-7xl justify-between flex flex-row items-center  px-4 sm:px-6 lg:px-20">
+          <div className="flex  h-16 items-center gap-4">
             {/* Deadlines Icon */}
             <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
               <Calendar className="w-6 h-6 text-gray-700" />

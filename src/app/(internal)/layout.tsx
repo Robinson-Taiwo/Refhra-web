@@ -36,12 +36,14 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SidebarProvider defaultOpen={true}>
-          <AppSidebar />
+          <div className=" hidden xl:flex ">
+            <AppSidebar />
+          </div>
           <main className="w-screen relative ">
             {/* <SidebarTrigger /> */}
             <div className="flex flex-col">
               <Navbar />
-              <div className="px-10">{children}</div>
+              <div className="lg:px-10">{children}</div>
             </div>
           </main>
         </SidebarProvider>
