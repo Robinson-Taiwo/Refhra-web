@@ -26,8 +26,10 @@ export default function HomePage() {
 
         {/* Text Content */}
         <section className="flex flex-col justify-center flex-1 px-6 pt-32 pb-16 sm:px-10 lg:px-16">
-          <h1 className="text-white font-bold leading-tight
-            text-4xl sm:text-5xl lg:text-6xl xl:text-7xl max-w-3xl">
+          <h1
+            className="text-white font-bold leading-tight
+            text-4xl sm:text-5xl lg:text-6xl xl:text-7xl max-w-3xl"
+          >
             Unlocking the next level of Student Productivity
           </h1>
 
@@ -37,7 +39,7 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mt-8 w-fit">
-            <Link href="/dashboard">
+            <Link href="/onboarding">
               <Button className="bg-blue-600 hover:bg-blue-800 border border-white border-dashed px-8 py-6 text-lg font-semibold">
                 Get Started
               </Button>

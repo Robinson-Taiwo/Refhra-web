@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HarmoniQ",
+  title: "Refhra Web",
   description: "A balance and profuctivity platform",
 };
 
@@ -31,23 +31,20 @@ export default async function RootLayout({
   // const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <SidebarProvider defaultOpen={true}>
-          <div className=" hidden xl:flex ">
-            <AppSidebar />
-          </div>
-          <main className="w-screen relative ">
-            {/* <SidebarTrigger /> */}
-            <div className="flex flex-col">
-              <Navbar />
-              <div className="lg:px-10">{children}</div>
-            </div>
-          </main>
-        </SidebarProvider>
-      </body>
-    </html>
+    <SidebarProvider
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      defaultOpen={true}
+    >
+      <div className=" hidden xl:flex ">
+        <AppSidebar />
+      </div>
+      <main className="w-screen relative ">
+        {/* <SidebarTrigger /> */}
+        <div className="flex flex-col">
+          <Navbar />
+          <div className="lg:px-10">{children}</div>
+        </div>
+      </main>
+    </SidebarProvider>
   );
 }

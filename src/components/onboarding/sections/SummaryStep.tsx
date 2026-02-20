@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 type Task = string;
 type Category = { title: string };
 
@@ -45,6 +47,8 @@ type Data = {
 type Props = { data: Data; onBack: () => void };
 
 export default function SummaryStep({ data, onBack }: Props) {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col pb-10 h-full w-full">
       <div className="flex-1 overflow-y-auto px-2 sm:px-6">
@@ -168,22 +172,24 @@ export default function SummaryStep({ data, onBack }: Props) {
             </ul>
           </section>
         )}
-      {/* Actions */}
-      <div className="px-4 pb-10  w-full">
-        <div className="flex justify-between">
-          <button onClick={onBack} className="text-gray-500">
-            ← Back
-          </button>
-          <button
-            onClick={() => console.log("🎯 Onboarding finished", data)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg"
-          >
-            Finish 🎯
-          </button>
+        {/* Actions */}
+        <div className="px-4 pb-10  w-full">
+          <div className="flex justify-between">
+            <button onClick={onBack} className="text-gray-500">
+              ← Back
+            </button>
+            <button
+              onClick={() => {
+                console.log("🎯 Onboarding finished", data);
+                router.push("/dashboard");
+              }}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg"
+            >
+              Finish 🎯
+            </button>
+          </div>
         </div>
       </div>
-      </div>
-
     </div>
   );
 }
