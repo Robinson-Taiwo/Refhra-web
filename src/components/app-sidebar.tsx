@@ -133,13 +133,13 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer / Profile */}
-      <SidebarFooter>
+      <div className="flex items-center justify-center w-full">
         {/* Upgrade Prompt */}
-        <div className="bg-blue-50 xl:hidden 2xl:flex  border text-blue-900 md:h-10 lg:h-32 2xl:h-64  p-3 text-center items-center flex-col flex rounded-lg text-sm font-medium shadow-sm hover:bg-blue-100 transition-colors duration-200">
+        <div className="bg-blue-50 xl:hidden 2xl:flex  border text-blue-900 md:h-10 lg:h-32 2xl:h-64  p-3 text-center items-center flex-col flex rounded-lg text-sm font-medium shadow-sm hover:bg-blue-100 transition-colors w-[89%] md:w-full duration-200">
           <Image
             src={rocket}
             alt="logo"
-            className="rounded-full lg:hidden 2xl:flex lg:h-30 lg:w-30 md:h-30 md:w-30  h-20 w-20 "
+            className="rounded-full  2xl:flex lg:h-fit lg:w-30 md:h-30 md:w-30  h-20 w-20 "
             width={40} // desired width in pixels
             height={40} // desired height in pixels
           />{" "}
@@ -156,6 +156,9 @@ export function AppSidebar() {
             Upgrade Now
           </Link>
         </div>
+      </div>
+
+      <SidebarFooter>
         <SidebarMenu className="mt-10">
           <SidebarMenuItem>
             <DropdownMenu>
