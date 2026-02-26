@@ -5,7 +5,7 @@ const Login = () => {
   return (
     <>
       <div className="flex h-screen w-screen flex-row">
-        <div className="lg:flex w-[47%] hidden  bg-gray-300 "></div>
+        <div className="lg:flex w-[47%] hidden  bg-blue-600 "></div>
 
         <section className="flex flex-1 h-full px-6 pt-4  items-center justify-center">
           <div className="justify-center  flex flex-col ">

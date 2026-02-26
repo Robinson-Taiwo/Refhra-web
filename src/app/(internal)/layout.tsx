@@ -1,6 +1,6 @@
 // import { cookies } from "next/headers";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 
 import type { Metadata } from "next";
@@ -31,20 +31,28 @@ export default async function RootLayout({
   // const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
-    <SidebarProvider
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      defaultOpen={true}
-    >
-      <div className=" hidden xl:flex ">
-        <AppSidebar />
-      </div>
-      <main className="w-screen relative ">
-        {/* <SidebarTrigger /> */}
-        <div className="flex flex-col">
-          <Navbar />
-          <div className="lg:px-10">{children}</div>
+    <SidebarProvider defaultOpen>
+      <div></div>
+      <div
+        className={`${geistSans.variable} ${geistMono.variable} antialiased  flex min-h-screen w-full `}
+      >
+        {/* Desktop Sidebar */}
+        <div className="hidden md:block">
+          <AppSidebar />
         </div>
-      </main>
+
+        <div className="flex flex-1 flex-col">
+          {/* Navbar */}
+          <Navbar />
+
+          {/* Mobile Sidebar Trigger */}
+          <div className="md:hidden p-4">
+            <SidebarTrigger />
+          </div>
+
+          <main className="flex-1 p-6">{children}</main>
+        </div>
+      </div>
     </SidebarProvider>
   );
 }

@@ -113,13 +113,13 @@ const SignupForm = () => {
             )}
           />
 
-          <Button className="mt-4">Sign up</Button>
+          <Button className="mt-4 bg-blue-600 hover:bg-blue-800 ">Sign up</Button>
         </form>
       </Form>
 
       {/* third party sign in */}
       <div className="flex space-y-[10px] flex-col ">
-        <Button className=" rounded-[8px] bg-transparent border flex flex-row shadow-none text-black   ">
+        <Button className=" hover:text-white hover:bg-blue-600 rounded-[8px] bg-transparent border flex flex-row shadow-none text-black   ">
           <span>
             {" "}
             <Image
@@ -133,7 +133,7 @@ const SignupForm = () => {
           <span>Sign in with Google</span>
         </Button>
 
-        <Button className=" rounded-[8px] bg-transparent border flex flex-row shadow-none text-black   ">
+        <Button className=" hover:text-white hover:bg-blue-600 rounded-[8px] bg-transparent border flex flex-row shadow-none text-black   ">
           <span>
             {" "}
             <Image

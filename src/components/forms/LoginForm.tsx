@@ -131,12 +131,12 @@ const LoginForm = () => {
               </FormItem>
             )}
           />
-          <Button className="mt-4">Login</Button>
+          <Button className="mt-4 bg-blue-600 hover:bg-blue-800 ">Login</Button>
         </form>
       </Form>
 
       <div className="flex space-y-[10px] flex-col ">
-        <Button className=" rounded-[8px] bg-transparent border flex flex-row shadow-none text-black   ">
+        <Button className=" rounded-[8px] bg-transparent border flex flex-row shadow-none hover:text-white hover:bg-blue-600 text-black   ">
           <span>
             {" "}
             <Image
@@ -150,7 +150,7 @@ const LoginForm = () => {
           <span>Sign in with Google</span>
         </Button>
 
-        <Button className=" rounded-[8px] bg-transparent border flex flex-row shadow-none text-black   ">
+        <Button className=" hover:text-white hover:bg-blue-600 rounded-[8px] bg-transparent border flex flex-row shadow-none text-black   ">
           <span>
             {" "}
             <Image
